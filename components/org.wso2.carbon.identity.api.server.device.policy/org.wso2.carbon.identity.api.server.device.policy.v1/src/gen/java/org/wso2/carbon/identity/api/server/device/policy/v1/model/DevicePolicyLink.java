@@ -19,6 +19,7 @@
 package org.wso2.carbon.identity.api.server.device.policy.v1.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -47,6 +48,7 @@ public enum MethodEnum {
         value = v;
     }
 
+    @JsonValue
     public String value() {
         return value;
     }
@@ -81,6 +83,7 @@ public enum RelEnum {
         value = v;
     }
 
+    @JsonValue
     public String value() {
         return value;
     }
