@@ -22,7 +22,7 @@
     <parent>
         <groupId>org.wso2.carbon.identity.server.api</groupId>
         <artifactId>org.wso2.carbon.identity.api.server.device.policy</artifactId>
-        <version>1.6.36-SNAPSHOT</version>
+        <version>1.6.58-SNAPSHOT</version>
     </parent>
 
     <artifactId>org.wso2.carbon.identity.api.server.device.policy.v1</artifactId>
@@ -104,6 +104,9 @@
 
     <build>
         <plugins>
+            <!--The cxf-wso2-openapi-generator is not available in public repositories,-->
+            <!--so it has to be built and installed locally before enabling this.-->
+            <!--
             <plugin>
                 <groupId>org.openapitools</groupId>
                 <artifactId>openapi-generator-maven-plugin</artifactId>
@@ -137,6 +140,7 @@
                     </dependency>
                 </dependencies>
             </plugin>
+            -->
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>build-helper-maven-plugin</artifactId>
