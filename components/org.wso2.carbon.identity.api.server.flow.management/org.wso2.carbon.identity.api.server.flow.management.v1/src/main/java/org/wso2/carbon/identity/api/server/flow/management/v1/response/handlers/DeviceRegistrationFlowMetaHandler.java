@@ -22,7 +22,9 @@ import org.wso2.carbon.identity.api.server.flow.management.v1.constants.FlowEndp
 import org.wso2.carbon.identity.flow.mgt.Constants;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -73,9 +75,15 @@ public class DeviceRegistrationFlowMetaHandler extends AbstractMetaResponseHandl
         return executors;
     }
 
+    /**
+     * A device registration flow is started without an authenticated user, so it must register the device and
+     * verify the user with a one-time password; a username alone must not be enough to bind a device to a user.
+     */
     @Override
     public List<Set<String>> getRequiredExecutorGroups() {
 
-        return Collections.singletonList(Collections.singleton(DEVICE_REGISTRATION_EXECUTOR));
+        return Arrays.asList(
+                Collections.singleton(DEVICE_REGISTRATION_EXECUTOR),
+                new HashSet<>(Arrays.asList(EMAIL_OTP_EXECUTOR, SMS_OTP_EXECUTOR)));
     }
 }
