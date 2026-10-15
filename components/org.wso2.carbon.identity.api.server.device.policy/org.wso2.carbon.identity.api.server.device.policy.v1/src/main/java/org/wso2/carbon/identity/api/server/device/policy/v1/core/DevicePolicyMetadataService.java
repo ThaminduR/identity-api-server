@@ -27,7 +27,8 @@ import org.wso2.carbon.identity.api.server.device.policy.v1.model.DevicePolicyOp
 import org.wso2.carbon.identity.api.server.device.policy.v1.model.DevicePolicyValue;
 import org.wso2.carbon.identity.api.server.device.policy.v1.model.DevicePolicyValueObject;
 import org.wso2.carbon.identity.api.server.device.policy.v1.util.DevicePolicyAPIErrorBuilder;
-import org.wso2.carbon.identity.device.policy.api.service.DeviceFieldMetadataService;
+import org.wso2.carbon.identity.device.policy.api.model.DeviceField;
+import org.wso2.carbon.identity.device.policy.api.model.Platform;
 import org.wso2.carbon.identity.rule.metadata.api.exception.RuleMetadataException;
 import org.wso2.carbon.identity.rule.metadata.api.model.FieldDefinition;
 import org.wso2.carbon.identity.rule.metadata.api.model.FlowType;
@@ -40,12 +41,7 @@ import org.wso2.carbon.identity.rule.metadata.api.model.Value;
 import org.wso2.carbon.identity.rule.metadata.api.service.RuleMetadataService;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 import javax.ws.rs.core.Response;
 
@@ -55,17 +51,11 @@ import javax.ws.rs.core.Response;
  */
 public class DevicePolicyMetadataService {
 
-    private static final Set<String> SUPPORTED_PLATFORMS = Collections.unmodifiableSet(
-            new HashSet<>(Arrays.asList("android", "ios", "macos", "windows")));
-
     private final RuleMetadataService ruleMetadataService;
-    private final DeviceFieldMetadataService deviceFieldMetadataService;
 
-    public DevicePolicyMetadataService(RuleMetadataService ruleMetadataService,
-                                       DeviceFieldMetadataService deviceFieldMetadataService) {
+    public DevicePolicyMetadataService(RuleMetadataService ruleMetadataService) {
 
         this.ruleMetadataService = ruleMetadataService;
-        this.deviceFieldMetadataService = deviceFieldMetadataService;
     }
 
     /**
@@ -78,7 +68,8 @@ public class DevicePolicyMetadataService {
      */
     public List<DevicePolicyFieldDefinition> getMetadata(String platform) {
 
-        if (platform != null && !SUPPORTED_PLATFORMS.contains(platform)) {
+        Platform requestedPlatform = Platform.fromValue(platform);
+        if (platform != null && (requestedPlatform == null || !requestedPlatform.getValue().equals(platform))) {
             throw DevicePolicyAPIErrorBuilder.handleException(Response.Status.BAD_REQUEST,
                     Constants.ErrorMessage.ERROR_CODE_INVALID_PLATFORM);
         }
@@ -88,11 +79,8 @@ public class DevicePolicyMetadataService {
             List<FieldDefinition> allFields =
                     ruleMetadataService.getExpressionMeta(FlowType.DEVICE_POLICY, tenantDomain);
 
-            Map<String, List<String>> applicablePlatforms =
-                    deviceFieldMetadataService.getFieldApplicablePlatforms();
-
             return allFields.stream()
-                    .filter(fd -> isApplicable(fd.getField().getName(), platform, applicablePlatforms))
+                    .filter(fd -> isApplicable(fd.getField().getName(), requestedPlatform))
                     .map(this::toApiModel)
                     .collect(Collectors.toList());
         } catch (RuleMetadataException e) {
@@ -101,14 +89,17 @@ public class DevicePolicyMetadataService {
         }
     }
 
-    private boolean isApplicable(String fieldName, String platform,
-                                 Map<String, List<String>> applicablePlatformsMap) {
+    /**
+     * A field applies to a platform when the device field declares it, or when the field is not a known device
+     * field and therefore carries no platform restriction.
+     */
+    private boolean isApplicable(String fieldName, Platform platform) {
 
         if (platform == null) {
             return true;
         }
-        List<String> platforms = applicablePlatformsMap.get(fieldName);
-        return platforms == null || platforms.contains(platform);
+        DeviceField deviceField = DeviceField.fromName(fieldName);
+        return deviceField == null || deviceField.appliesTo(platform);
     }
 
     private DevicePolicyFieldDefinition toApiModel(FieldDefinition fd) {

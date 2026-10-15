@@ -20,7 +20,6 @@ package org.wso2.carbon.identity.api.server.device.policy.v1.factories;
 
 import org.wso2.carbon.identity.api.server.device.policy.common.DevicePolicyMetadataServiceHolder;
 import org.wso2.carbon.identity.api.server.device.policy.v1.core.DevicePolicyMetadataService;
-import org.wso2.carbon.identity.device.policy.api.service.DeviceFieldMetadataService;
 import org.wso2.carbon.identity.rule.metadata.api.service.RuleMetadataService;
 
 /**
@@ -34,17 +33,12 @@ public class DevicePolicyMetadataServiceFactory {
 
     static {
         RuleMetadataService ruleMetadataService = DevicePolicyMetadataServiceHolder.getRuleMetadataService();
-        DeviceFieldMetadataService deviceFieldMetadataService =
-                DevicePolicyMetadataServiceHolder.getDeviceFieldMetadataService();
 
         if (ruleMetadataService == null) {
             throw new IllegalStateException("RuleMetadataService is not available from OSGi context.");
         }
-        if (deviceFieldMetadataService == null) {
-            throw new IllegalStateException("DeviceFieldMetadataService is not available from OSGi context.");
-        }
 
-        SERVICE = new DevicePolicyMetadataService(ruleMetadataService, deviceFieldMetadataService);
+        SERVICE = new DevicePolicyMetadataService(ruleMetadataService);
     }
 
     public static DevicePolicyMetadataService getDevicePolicyMetadataService() {

@@ -78,7 +78,7 @@ components:
           authorizationUrl: 'https://localhost:9443/oauth2/authorize'
           tokenUrl: 'https://localhost:9443/oauth2/token'
           scopes:
-            read: internal_device_policy_view
+            read: internal_policy_mgt_view
   schemas:
     DevicePolicyFieldDefinition:
       type: object
